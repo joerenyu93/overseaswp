@@ -1,0 +1,44 @@
+version: "3.3"
+services:
+    mariadb:
+        image: mariadb:latest
+        container_name: wp-mariadb
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: '123'
+            MYSQL_DATABASE: overseaswp
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+        volumes:
+            - ./mariadb/db_data:/var/lib/mysql
+
+    wordpress:
+        depends_on:
+            - mariadb
+        image: wordpress:php7.2-fpm-alpine
+        container_name: wp-overseas
+        restart: always
+        environment:
+            WORDPRESS_DB_HOST: mariadb
+            WORDPRESS_DB_NAME: overseaswp
+            WORDPRESS_DB_USER: ${DB_USERNAME}
+            WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+        volumes:
+            - ./config/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+            - ./wordpress:/var/www/html
+
+    webserver:
+        depends_on:
+          - wordpress
+        image: nginx:latest
+        container_name: wp-nginx
+        restart: always
+        environment:
+            - TZ=Asia/Taipei
+        ports:
+            - "8020:80"
+        volumes:
+            - ./logs:/var/log/nginx
+            - ./nginx:/etc/nginx/conf.d
+            - ./wordpress:/var/www/html
+

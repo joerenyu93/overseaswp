@@ -1,0 +1,4 @@
+*.env
+mariadb/
+logs/
+wordpress/wp-content/wflogs/
